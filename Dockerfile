@@ -15,8 +15,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         jq ca-certificates unzip tmux gawk nano coreutils \
         net-tools rsync ncurses-base bash-completion \
         libgl1 libglib2.0-0 build-essential \
-        gcc g++ gcc-12 g++-12 gcc-12-locales cpp-12-doc \
-        g++-12-multilib gcc-12-doc gcc-12-multilib libstdc++-12-doc cmake && \
+        gcc g++ cmake \
+        openssh-server && \
+    mkdir -p /run/sshd && \
     git lfs install --system && \
     ln -sf /usr/bin/python3.12 /usr/bin/python && \
     ln -sf /usr/bin/pip3 /usr/bin/pip && \
@@ -105,6 +106,13 @@ RUN for repo in \
             python "/ComfyUI/custom_nodes/$repo_dir/install.py"; \
         fi; \
     done
+
+# Expose ports
+
+EXPOSE 22 8188 8288 8388 8888
+
+# Prepare for ssh 
+RUN mkdir -p /var/run/sshd
 
 # Make sure /workspace exists (Vast will usually mount over it)
 RUN mkdir -p /workspace
