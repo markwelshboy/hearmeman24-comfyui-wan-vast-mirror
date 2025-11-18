@@ -17,6 +17,21 @@ fi
 
 cd "$RUNTIME_DIR"
 
+# install small helpers into /root
+# Capture repo root dynamically
+TMP="/root/.bashrc.temp"
+# Copy the repo version
+cp .bashrc "$TMP"
+# Replace the placeholder
+sed -i "s|REPO_ROOT=<CHANGEME>|REPO_ROOT=\"$RUNTIME_DIR\"|" "$TMP"
+# Install into place
+install -m 0644 "$TMP" /root/.bashrc
+# Clean up
+rm -f "$TMP"
+
+install -m 0644 .bash_functions /root/.bash_functions
+install -m 0644 .bash_aliases /root/.bash_aliases
+
 if [ ! -x ./start.sh ]; then
   chmod +x ./start.sh
 fi

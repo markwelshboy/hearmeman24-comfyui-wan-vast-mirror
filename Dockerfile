@@ -12,7 +12,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         python3.12 python3.12-venv python3.12-dev \
         python3-pip \
         curl ffmpeg ninja-build git aria2 git-lfs wget vim \
-        libgl1 libglib2.0-0 build-essential gcc && \
+        jq ca-certificates unzip tmux gawk nano coreutils \
+        net-tools ncurses-base bash-completion \
+        libgl1 libglib2.0-0 build-essential gcc g++ cmake && \
+    git lfs install --system && \
     ln -sf /usr/bin/python3.12 /usr/bin/python && \
     ln -sf /usr/bin/pip3 /usr/bin/pip && \
     python3.12 -m venv /opt/venv && \
@@ -28,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install packaging setuptools wheel "huggingface_hub==0.36.0"
 
-# ---- Runtime libs + comfy-cli + jupyter + onyxruntime-gpu ----
+# ---- Runtime libs + comfy-cli + jupyter + onyxruntime-gpu + opencv-python ----
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install \
         pyyaml gdown triton \
@@ -36,7 +39,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         jupyterlab jupyterlab-lsp \
         jupyter-server jupyter-server-terminals \
         ipykernel jupyterlab_code_formatter \
-        onnxruntime-gpu
+        onnxruntime-gpu opencv-python
 
 # ---- ComfyUI install (no models yet) ----
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -50,8 +53,8 @@ FROM base AS final
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Just in case something needs cv2
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install opencv-python
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install opencv-python
 
 RUN for repo in \
     https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git \
