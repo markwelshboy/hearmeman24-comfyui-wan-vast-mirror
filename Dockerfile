@@ -13,8 +13,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         python3-pip \
         curl ffmpeg ninja-build git aria2 git-lfs wget vim \
         jq ca-certificates unzip tmux gawk nano coreutils \
-        net-tools ncurses-base bash-completion \
-        libgl1 libglib2.0-0 build-essential gcc g++ cmake && \
+        net-tools rsync ncurses-base bash-completion \
+        libgl1 libglib2.0-0 build-essential \
+        gcc g++ gcc-12 g++-12 gcc-12-locales cpp-12-doc \
+        g++-12-multilib gcc-12-doc gcc-12-multilib libstdc++-12-doc cmake && \
     git lfs install --system && \
     ln -sf /usr/bin/python3.12 /usr/bin/python && \
     ln -sf /usr/bin/pip3 /usr/bin/pip && \
@@ -52,9 +54,11 @@ FROM base AS final
 
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Just in case something needs cv2
-#RUN --mount=type=cache,target=/root/.cache/pip \
-#    pip install opencv-python
+# --- Build metadata for logs ---
+ARG IMAGE_TAG=wan-cu128
+ARG BUILD_GIT_SHA=unknown
+ENV IMAGE_TAG=${IMAGE_TAG} \
+    BUILD_GIT_SHA=${BUILD_GIT_SHA}
 
 RUN for repo in \
     https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git \
@@ -105,8 +109,11 @@ RUN for repo in \
 # Make sure /workspace exists (Vast will usually mount over it)
 RUN mkdir -p /workspace
 
+# Copy the upscaler
+COPY 4xLSDIR.pth /
+
 # Thin startup wrapper – this is where you’ll hook your big shell later
 COPY src/start_script.sh /start_script.sh
 RUN chmod +x /start_script.sh
 
-CMD ["/start_script.sh"]
+ENTRYPOINT ["/start_script.sh"]
